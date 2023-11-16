@@ -24,13 +24,23 @@ const App: React.FC = () => {
     const ambientLight = new THREE.AmbientLight(0x404040); // 環境光
     scene.add(ambientLight);
 
-    // 複数の光源を作成
+    // 動く光源（妖精のように）を3色作成
     const lights = [
       new THREE.PointLight(0xff0000, 1, 100),
       new THREE.PointLight(0x00ff00, 1, 100),
       new THREE.PointLight(0x0000ff, 1, 100),
     ];
     lights.forEach(light => scene.add(light));
+
+    // 各光源を囲む光るオブジェクトを作成
+    const lightSpheres = lights.map(light => {
+      const lightSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(0.1, 16, 8),
+        new THREE.MeshBasicMaterial({ color: light.color })
+      );
+      scene.add(lightSphere);
+      return lightSphere;
+    });
 
     // キューブを作成
     const geometry = new THREE.BoxGeometry();
@@ -66,10 +76,27 @@ const App: React.FC = () => {
       cube.rotation.x += 0.01;
       cube.rotation.y += 0.01;
 
-      // 光源の動き
-      lights[0].position.set(Math.sin(time * 2) * 2, Math.cos(time * 3) * 2, Math.cos(time * 2) * 2);
-      lights[1].position.set(Math.sin(time * 3) * 2, Math.cos(time * 2) * 2, Math.sin(time * 3) * 2);
-      lights[2].position.set(Math.sin(time * 2) * 2, Math.cos(time * 3) * 2, Math.sin(time * 2) * 2);
+      // 各光源の動き（妖精のように）
+      lights[0].position.x = Math.sin(time * 2) * 2;
+      lights[0].position.y = Math.cos(time * 3) * 2 + 2;
+      lights[0].position.z = Math.cos(time * 2) * 2;
+
+      lights[1].position.x = Math.sin(time * 3) * 2 + 2;
+      lights[1].position.y = Math.cos(time * 2) * 2;
+      lights[1].position.z = Math.sin(time * 3) * 2;
+
+      lights[2].position.x = Math.sin(time * 4) * 2;
+      lights[2].position.y = Math.cos(time * 4) * 2 + 2;
+      lights[2].position.z = Math.sin(time * 4) * 2;
+
+      // 各光るオブジェクトの位置を光源に同期
+      lightSpheres.forEach((sphere, index) => {
+        sphere.position.set(
+          lights[index].position.x, 
+          lights[index].position.y, 
+          lights[index].position.z
+        );
+      });
 
       // 描画
       renderer.render(scene, camera);
