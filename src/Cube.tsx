@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-const App: React.FC = () => {
+const Cube: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ const App: React.FC = () => {
     // レンダラーを作成
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x000000); // 明るい空の色に背景色を設定
+    renderer.setClearColor(0x000000, 1); // 背景色を黒に設定
 
     // レンダラーをDOMに追加
     mountRef.current?.appendChild(renderer.domElement);
@@ -24,37 +24,26 @@ const App: React.FC = () => {
     const ambientLight = new THREE.AmbientLight(0x404040); // 環境光
     scene.add(ambientLight);
 
-    // 複数の光源を作成
-    const lights = [
-      new THREE.PointLight(0xff0000, 1, 100),
-      new THREE.PointLight(0x00ff00, 1, 100),
-      new THREE.PointLight(0x0000ff, 1, 100),
-    ];
-    lights.forEach(light => scene.add(light));
+    // 動く光源（妖精のように）を作成
+    const light = new THREE.PointLight(0xffffff, 1, 1000);
+    scene.add(light);
+
+    // 光源を囲む光るオブジェクトを作成
+    const lightSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(0.1, 16, 8),
+      new THREE.MeshBasicMaterial({ color: 0xffffff })
+    );
+    scene.add(lightSphere);
 
     // キューブを作成
     const geometry = new THREE.BoxGeometry();
     const material = new THREE.MeshStandardMaterial({ 
-      color: 0xffffff, // 白色
+      color: 0x00ff00,
       transparent: true,
-      opacity: 0.8
+      opacity: 0.5
     });
     const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
-
-    // 星のような粒子を作成（オプション）
-    const starsGeometry = new THREE.BufferGeometry();
-    const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
-    const starsVertices = [];
-    for (let i = 0; i < 1000; i++) {
-      const x = THREE.MathUtils.randFloatSpread(200);
-      const y = THREE.MathUtils.randFloatSpread(200);
-      const z = THREE.MathUtils.randFloatSpread(200);
-      starsVertices.push(x, y, z);
-    }
-    starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
-    const stars = new THREE.Points(starsGeometry, starsMaterial);
-    scene.add(stars);
 
     // アニメーションを作成
     let time = 0;
@@ -66,10 +55,13 @@ const App: React.FC = () => {
       cube.rotation.x += 0.01;
       cube.rotation.y += 0.01;
 
-      // 光源の動き
-      lights[0].position.set(Math.sin(time * 2) * 2, Math.cos(time * 3) * 2, Math.cos(time * 2) * 2);
-      lights[1].position.set(Math.sin(time * 3) * 2, Math.cos(time * 2) * 2, Math.sin(time * 3) * 2);
-      lights[2].position.set(Math.sin(time * 2) * 2, Math.cos(time * 3) * 2, Math.sin(time * 2) * 2);
+      // 光源の動き（妖精のように）
+      light.position.x = Math.sin(time * 2) * 2;
+      light.position.y = Math.cos(time * 3) * 2 + 2;
+      light.position.z = Math.cos(time * 2) * 2;
+
+      // 光るオブジェクトの位置を光源に同期
+      lightSphere.position.set(light.position.x, light.position.y, light.position.z);
 
       // 描画
       renderer.render(scene, camera);
@@ -87,4 +79,4 @@ const App: React.FC = () => {
   return <div ref={mountRef} />;
 };
 
-export default App;
+export default Cube;
