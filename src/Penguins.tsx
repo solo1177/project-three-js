@@ -11,8 +11,8 @@ const PenguinTextures = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     mountRef.current.appendChild(renderer.domElement);
 
-    scene.background = new THREE.Color(0xb0e0e6); // より明るい青色の背景
-    const light = new THREE.AmbientLight(0xffffff, 0.7); // 明るい光
+    scene.background = new THREE.Color(0xb0e0e6);
+    const light = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(light);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
     scene.add(directionalLight);
@@ -25,7 +25,7 @@ const PenguinTextures = () => {
       new THREE.MeshBasicMaterial({ color: 0x6699CC, wireframe: true }),
     ];
 
-    const penguins = materials.map(material => createPenguin(material, 1.2)); // サイズを1.2倍に
+    const penguins = materials.map(material => createPenguin(material));
     penguins.forEach((penguin, index) => {
       penguin.position.x = index * 5 - (penguins.length - 1) * 2.5;
       scene.add(penguin);
